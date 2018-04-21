@@ -1,5 +1,5 @@
 0:angry
 1:happy
-2:peaceful
-3:sad
-4:scary
+2:horror
+3:peaceful
+4:sad
