@@ -33,10 +33,10 @@ def main():
     if not FLAGS.dataset_dir:
         raise ValueError('dataset_dir is empty. Please state a dataset_dir argument.')
 
-    #If the TFRecord files already exist in the directory, then exit without creating the files again
-    if _dataset_exists(dataset_dir = FLAGS.dataset_dir, _NUM_SHARDS = FLAGS.num_shards, output_filename = FLAGS.tfrecord_filename):
-        print 'Dataset files already exist. Exiting without re-creating them.'
-        return None
+    # #If the TFRecord files already exist in the directory, then exit without creating the files again
+    # if _dataset_exists(dataset_dir = FLAGS.dataset_dir, _NUM_SHARDS = FLAGS.num_shards, output_filename = FLAGS.tfrecord_filename):
+    #     print 'Dataset files already exist. Exiting without re-creating them.'
+    #     return None
     #==============================================================END OF CHECKS===================================================================
 
     #Get a list of photo_filenames like ['123.jpg', '456.jpg'...] and a list of sorted class names from parsing the subdirectories.

@@ -129,21 +129,27 @@ def _get_filenames_and_classes(dataset_dir):
     A list of image file paths, relative to `dataset_dir` and the list of
     subdirectories, representing class names.
   """
-  print 'DATASET DIR:', dataset_dir
-  class_names = [name for name in os.listdir(dataset_dir) if os.path.isdir(dataset_dir + name)]
-  print 'subdir:', class_names
-
+  # print 'DATASET DIR:', dataset_dir
+  # print 'subdir:', [name for name in os.listdir(dataset_dir)]
+  # dataset_main_folder_list = []
+  # for name in os.listdir(dataset_dir):
+  # 	if os.path.isdir(name):
+  # 		dataset_main_folder_list.append(name)
+  dataset_main_folder_list = [name for name in os.listdir(dataset_dir) if os.path.isdir(os.path.join(dataset_dir,name))]
+  dataset_root = os.path.join(dataset_dir, dataset_main_folder_list[0])
+  directories = []
+  class_names = []
+  for filename in os.listdir(dataset_root):
+    path = os.path.join(dataset_root, filename)
+    if os.path.isdir(path):
+      directories.append(path)
+      class_names.append(filename)
 
   photo_filenames = []
-
-  for directory in class_names:
-    for filename in os.listdir(os.path.join(dataset_dir,directory)):
-      if not filename.endswith('.jpg') or filename.startswith('.'):
-        continue
-      path = os.path.join(dataset_dir, directory, filename)
+  for directory in directories:
+    for filename in os.listdir(directory):
+      path = os.path.join(directory, filename)
       photo_filenames.append(path)
-
-  #print 'image files:\n', [f for f in photo_filenames]
 
   return photo_filenames, sorted(class_names)
 
@@ -193,7 +199,7 @@ def _convert_dataset(split_name, filenames, class_names_to_ids, dataset_dir, tfr
             class_id = class_names_to_ids[class_name]
 
             example = image_to_tfexample(
-                image_data, 'jpg', height, width, class_id)
+                image_data, 'png', height, width, class_id)
             tfrecord_writer.write(example.SerializeToString())
 
   sys.stdout.write('\n')
