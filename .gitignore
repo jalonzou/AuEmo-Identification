@@ -2,3 +2,4 @@
 .DS_Store
 *.tfrecord
 *.pyc
+_pyche_
