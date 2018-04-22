@@ -1,7 +1,4 @@
 
-audemo_dataset/img_data/.DS_Store
-*.tfrecord
-*.tfrecord
+.DS_Store
 *.tfrecord
 *.pyc
-Record_creater/dataset_utils.py
