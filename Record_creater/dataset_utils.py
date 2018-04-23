@@ -2,6 +2,9 @@ import math
 import os
 import sys
 import tensorflow as tf
+from PIL import Image
+
+import numpy as np
 
 slim = tf.contrib.slim
 
@@ -104,7 +107,7 @@ class ImageReader(object):
   def __init__(self):
     # Initializes function that decodes RGB JPEG data.
     self._decode_image_data = tf.placeholder(dtype=tf.string)
-    self._decode_image = tf.image.decode_image(self._decode_image_data, channels=3)
+    self._decode_image = tf.image.decode_image(self._decode_image_data, channels=1)
 
   def read_image_dims(self, sess, image_data):
     image = self.decode_image(sess, image_data)
@@ -114,7 +117,7 @@ class ImageReader(object):
     image = sess.run(self._decode_image,
                      feed_dict={self._decode_image_data: image_data})
     assert len(image.shape) == 3
-    assert image.shape[2] == 3
+    assert image.shape[2] == 1
     return image
 
 
@@ -130,13 +133,15 @@ def _get_filenames_and_classes(dataset_dir):
     subdirectories, representing class names.
   """
   print 'DATASET DIR:', dataset_dir
-  class_names = [name for name in os.listdir(dataset_dir) if os.path.isdir(dataset_dir + name)]
+  class_names = [name for name in os.listdir(dataset_dir) if not name.startswith('.')]
+  print os.listdir(dataset_dir)
   print 'subdir:', class_names
-
 
   photo_filenames = []
 
   for directory in class_names:
+    if directory.startswith('.'):
+        continue
     for filename in os.listdir(os.path.join(dataset_dir,directory)):
       if not filename.endswith('.jpg') or filename.startswith('.'):
         continue
@@ -186,8 +191,12 @@ def _convert_dataset(split_name, filenames, class_names_to_ids, dataset_dir, tfr
             sys.stdout.flush()
 
             # Read the filename:
-            image_data = tf.gfile.FastGFile(filenames[i], 'r').read()
-            height, width = image_reader.read_image_dims(sess, image_data)
+            img = np.array(Image.open(filenames[i]))
+            image_data = img.tostring()
+            # image_data = tf.gfile.FastGFile(filenames[i], 'r').read()
+            # height, width = image_reader.read_image_dims(sess, image_data)
+            height = img.shape[0]
+            width = img.shape[1]
 
             class_name = os.path.basename(os.path.dirname(filenames[i]))
             class_id = class_names_to_ids[class_name]

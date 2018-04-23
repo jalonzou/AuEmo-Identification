@@ -9,10 +9,10 @@ flags = tf.app.flags
 flags.DEFINE_string('dataset_dir', None, 'String: Your dataset directory')
 
 # The number of images in the validation set. You would have to know the total number of examples in advance. This is essentially your evaluation dataset.
-flags.DEFINE_float('validation_size', 0.3, 'Float: The proportion of examples in the dataset to be used for validation')
+flags.DEFINE_float('validation_size', 0.2, 'Float: The proportion of examples in the dataset to be used for validation')
 
 # The number of shards to split the dataset into
-flags.DEFINE_integer('num_shards', 2, 'Int: Number of shards to split the TFRecord files')
+flags.DEFINE_integer('num_shards', 1, 'Int: Number of shards to split the TFRecord files')
 
 # Seed for repeatability.
 flags.DEFINE_integer('random_seed', 0, 'Int: Random seed to use for repeatability.')
@@ -33,10 +33,10 @@ def main():
     if not FLAGS.dataset_dir:
         raise ValueError('dataset_dir is empty. Please state a dataset_dir argument.')
 
-    #If the TFRecord files already exist in the directory, then exit without creating the files again
-    if _dataset_exists(dataset_dir = FLAGS.dataset_dir, _NUM_SHARDS = FLAGS.num_shards, output_filename = FLAGS.tfrecord_filename):
-        print 'Dataset files already exist. Exiting without re-creating them.'
-        return None
+    # #If the TFRecord files already exist in the directory, then exit without creating the files again
+    # if _dataset_exists(dataset_dir = FLAGS.dataset_dir, _NUM_SHARDS = FLAGS.num_shards, output_filename = FLAGS.tfrecord_filename):
+    #     print 'Dataset files already exist. Exiting without re-creating them.'
+    #     return None
     #==============================================================END OF CHECKS===================================================================
 
     #Get a list of photo_filenames like ['123.jpg', '456.jpg'...] and a list of sorted class names from parsing the subdirectories.
