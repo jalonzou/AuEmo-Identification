@@ -45,7 +45,7 @@ trainAEIS('/home/my_dataset', 1000, 2)
 ## Audio Data Processing
 In this section, we present some technical datails on our implementation of audio data converting process.
 
-## Dataset generation
+## Dataset Generation
 In this section, we demonstrate our way in assembling training dataset for neural network training purpose.
 
 ## Network Structure
@@ -53,14 +53,46 @@ In this section, we present our idea of designing an expressive neural network s
 
 Our training module is built on Tensorflow framework, one of the most widely accepted frameworks in deep learning field. With the help of this framework, we can implement our network structure in a few lines of code and conduct training process on it in a systematic way. All the computation units inside the network, the hidden and output layer, the accuracy calculator, the logger,etc. are defined as nodes in Tensorflow, which is extremely straightforward for you to define your own operation.
 
-The current release of our system is based on Tensorflow 1.8. For more information of this version, see: https://www.tensorflow.org/api_docs/
+The current release of our system is based on Tensorflow 1.8. For more information on this version, see: https://www.tensorflow.org/api_docs/
 
-The network structure of our system can be roughly divided into three parts. 
+The network structure of this system can be roughly divided into three parts:
 - The first part consists of convolutional layers which takes dataset as input and output **local features** extracted from the raw images. 
 - The second part is built from recursive layers. Here we adopted GRU unit as the time series data extractor. We will go into details on this later soon.
-- The final part is a generalized layer which 
+- The final part is a layer for generalization purpose which contains a full connection layer with **dropout** mechanism. This lay is set to be **Optional** according to the complexity of training dataset.
 
 ### Local Feature extraction Layer
-With the presence of mel-spectrograms generated from certain audio dataset. The first task of ;
+With the presence of mel-spectrograms generated from raw audio dataset. Our task is to make full use of input data by extracting as many _informative_ signals as possible. Rich number of attempts have been make to validate convolutional neural network's potential in studying audio data in the form of spectrograms[1]. But none of them has extended the application of this idea into emotion recognition field so far. Our initial idea of feature extractor units is motivated by their research outcome.
 
-Implementation of Audio emotion identification neural network using CNN and RNN
+The local feature extraction layer consists of 4 blocks of 2D convolution with ReLU nonlinearity. At the output end of each hidden layer is a max-pooling layer together with L2 normalization. We use 7x7 filters for the first convoluational layer, 5x5 for the second and 3x3 for the rest. Filter size for max-pooling is always 3x3 with stride 2.
+
+The picture below best demonstrate our design:
+"Wait for pic"
+
+### Times series information extraction layer
+It is quite intuitive the fact that our capability of recognizing the meaning of sound rooted from its mutable nature in frequency along time axis. Motivated by this fact we decide to stack recursive network layers on top of convolutional layers to extract time-series features, i.e., we apply a recursive layer which takes the output of the convolutional layers (the feature maps) as input. Concretely, we introduce GRU unit[2] as the basic unit comprising this part.
+
+The output of the convolutional layer is a series of feature maps, currently set in quantity 32. Each map contains extracted information from the raw input spectrogram. Similar to our traditional attempt in feeding raw audio data (or sepctrogram) directly into recursive network layer, we treat each feature maps as a raw spectrogram, slice them into columns and assume one column of feature maps represents information of one instant. This kind of design works pretty well in exploiting relation on the time scale which is usually imperceptible to human beings.
+
+At the output end of this layer, we only take the final state output by the GRU unit. Note here that for sake of reducing complexity of our model, we currently only applied **one** GRU unit to this layer which takes each feature map as time-series information and flatten them before inputting. We reserve our implementation of the aforementioned model and may add it back as an optional choice in the future release. Currently one GRU unit works well in alleviating overfitting since it fundamentally reduces number of parameters. The output of this layer is a 1x128 tensor which will be feeded into full connection layer soon after.
+
+For more informaion on GRU unit, see: https://towardsdatascience.com/understanding-gru-networks-2ef37df6c9be
+
+### Full connection and softmax layers
+The final part of our network structure is similar to the paradigm of convolutional neural network (CNN). Given that we have obtained the output "final states" from the previous RNN layer. We are yet to figure out a effective way to combine all the states together. The full connection layer originated from the convolution neural network, and is widely recognized as a cheap way of learning non-linear combinations of input features.
+
+We are stilling working on evaluating the potential drawback incurred by adding full connection layer. In the future we may make this layer optional so that user can train their customized network to be applied to different scenarios
+
+At the end we specify a softmax layers for multi-class classification. The number of output (softmax neurons) is determined by user specified `NUM_OF_CLASS` parameter, which is further determined by the input dataset and real-world applications.
+
+## Dataset for Testing
+In order to validate the performance of our dataset and facilitate users' learning process. We introduce here two datasets which is feasible for testing our system. The first dataset contains pure piano solos, classified into four classes. And the second one is a dataset of songs downloaded from: [Songs Emotion Dataset](https://code.soundsoftware.ac.uk/projects/emotion-recognition/repository/show/4.%20dataset%20(audio))
+
+### Piano Emotion Dataset
+This dataset is totaly collected and handmade by our team.
+
+### Songs Emotion Dataset
+
+## References
+[1] Abdel-Hamid, Ossama, et al. "Convolutional neural networks for speech recognition." IEEE/ACM Transactions on audio, speech, and language processing 22.10 (2014): 1533-1545.
+
+[2] Cho, Kyunghyun, et al. "Learning phrase representations using RNN encoder-decoder for statistical machine translation." arXiv preprint arXiv:1406.1078 (2014).
