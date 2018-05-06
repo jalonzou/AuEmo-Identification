@@ -53,9 +53,14 @@ In this section, we present our idea of designing an expressive neural network s
 
 Our training module is built on Tensorflow framework, one of the most widely accepted frameworks in deep learning field. With the help of this framework, we can implement our network structure in a few lines of code and conduct training process on it in a systematic way. All the computation units inside the network, the hidden and output layer, the accuracy calculator, the logger,etc. are defined as nodes in Tensorflow, which is extremely straightforward for you to define your own operation.
 
-The current release of our system is based on Tensorflow 1.8. For more information of this version, see: https://www.tensorflow.org/api_docs/[https://www.tensorflow.org/api_docs/]
+The current release of our system is based on Tensorflow 1.8. For more information of this version, see: https://www.tensorflow.org/api_docs/
+
+The network structure of our system can be roughly divided into three parts. 
+- The first part consists of convolutional layers which takes dataset as input and output **local features** extracted from the raw images. 
+- The second part is built from recursive layers. Here we adopted GRU unit as the time series data extractor. We will go into details on this later soon.
+- The final part is a generalized layer which 
 
 ### Local Feature extraction Layer
-The 
+With the presence of mel-spectrograms generated from certain audio dataset. The first task of ;
 
 Implementation of Audio emotion identification neural network using CNN and RNN
