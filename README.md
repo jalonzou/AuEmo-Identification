@@ -120,9 +120,11 @@ Apart from denosing tasks we need to perform. Plenty of tricks should be played 
 Although our current release of AEIS has achieved great success in pure music emotion identification. Business standard requires our work to be applied to a wide range of daily scenarios. We roughly classify the possible them into the following three categories:
 
 ### Human voice emotion recognition
-As we have mentioned earlier, today's speech recognition technology is well developed and is able to reach accuracy of over 99 percent, which is already satisfiable. However we never stop marching forward in this field as we desire to exploit full potential of computers and wish that someday their recognition accuracy can surpass humans.
+As we have mentioned earlier, today's speech recognition technology is well developed and is able to reach accuracy of over 99 percent, which is already satisfiable. However we never stop marching forward in this field as we desire to exploit full potential of computers and wish someday their recognition accuracy can surpass humans.
 
-This dream can not be realized without taking into account our emotions.
+This dream can not be realized, however, without appreciating human emotions.
+
+AEIS is subsystem designed precisely for this purpose. It will exist as a low-level complementory information generator.
 
 ### Pure music appreciation
 
