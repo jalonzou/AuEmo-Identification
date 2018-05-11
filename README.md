@@ -117,18 +117,32 @@ Apart from denosing tasks we need to perform. Plenty of tricks should be played 
 
 
 ## Prospects
-Although our current release of AEIS has achieved great success in pure music emotion identification. Business standard requires our work to be applied to a wide range of daily scenarios. We roughly classify the possible them into the following three categories:
+Although our current release of AEIS has achieved great success in identifying pure music emotion. Business standard requires our work to be applied to a wide range of daily scenarios. We roughly classify the possible applications of our system into the following three categories:
 
 ### Human voice emotion recognition
 As we have mentioned earlier, today's speech recognition technology is well developed and is able to reach accuracy of over 99 percent, which is already satisfiable. However we never stop marching forward in this field as we desire to exploit full potential of computers and wish someday their recognition accuracy can surpass humans.
 
-This dream can not be realized, however, without appreciating human emotions.
+This dream cannot be realized, however, without appreciating human emotions.
 
-AEIS is subsystem designed precisely for this purpose. It will exist as a low-level complementory information generator.
+AEIS is subsystem designed precisely for this purpose. It will exist as a low-level complementory information generator. In fact, modern speech recognition system commonly adopt neural network of which structures (mostly RNN) are mostly similar to our systems. From this perspective, we can seamlessly integrate our system to a genral speech recognizer from the bottom layers. Low computation overhead will be incurred and only a small surgery should be performed on the network structure.
+
+Apart from the application on speech recognition. Our system may, conversely, grant computer with ability to chat in a more humanized way. One of the biggest issue modern scientists are struggling with is to let computer speak naturally, i.e., speak with emotion. Primitive robots responded to human by pronouncing every word seperately. Modern AI assistants have marched so far beyond this as they are already capable of grouping words into sentences. The integration of our system further sharps their capabilities by helping them appreciate the conversation contexts and best express their meaning.
 
 ### Pure music appreciation
+The application of our system on pure music appreciation tasks can, to a large extent, improve children's musicality, i.e., understanding of music. Although machine's understanding in music can never transcend humans, we can still recruit them as a teacher that never makes things wrong. By learning from a hugh number of instrument collections, our system can point out the right emotion a music piece was willing to convey.
+
+Conversely such appreaciation ability may enable computer to composite their own music. We would not go further for now and leave these intriguing implementations to our future releases. 
 
 ### Music style emotion recognition
+The catogory is in a sense much similar to the part we mentioned above, but is more general and meaningful. But for pure music recognition, we try to teach our system to appreciate songs with human voice. This can be much more challenging since the human voice is actually a kind of "noise" in some contexts and "source of information" in other contexts, varying from one music style to another.
+
+This problem can somehow be addressed by building a more complicated system from the bottom. This system should at least incorporate the following technologies:
+
+- **Vocal removal and isolation**: Vocal removal is a traditional technology developed for splitting human voice from the background. It is widely used by the public to extract their favorite portions of music. As mentioned above both accompaniment and human voice tracks contain invaluable information in conveying the emotion of a specific songs. Hence this technology is doubtlessly necessary for our system to improve accuracy.
+
+- **Noise elimination**: As songs are mix of tracks. Noise will inevitably exist. Advanced noise elimination technology should be applied to eliminated these noise. We will not further this topic since it is irrelevant to our project.
+
+- **Natural language processing**: After isolating human voice from the accompaniment, we cannot simply discard the human voice track as it also contains decisive information in translating the song's emotion. These information can be preprocessed at first to alleviate the distortion and noise potentially caused by vocal removal. Then we are eligible to perform speech recognition on it and output the words or sentences. Finally we can input the group of words (sentences) into a well trained recursive neural network, which wil generate the semantic meaning of each sentence at the output end.
 
 ## References
 [1] Abdel-Hamid, Ossama, et al. "Convolutional neural networks for speech recognition." IEEE/ACM Transactions on audio, speech, and language processing 22.10 (2014): 1533-1545.
