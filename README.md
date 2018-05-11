@@ -113,8 +113,33 @@ One solution to this challenging case suggests us to place more effort on the da
 
 Apart from denosing tasks we need to perform. Plenty of tricks should be played as we wish to crest the peak of accuracy in songs emotion recognition. These tricks, however, is rather complicated to elaborate in several words. We will go further into details in the subsequent sections.
 
-## Improvement && Future Release
 
+## Improvement && Future Release
+The first release of our system is not able to cover all the topics we proposed at the beginning. In the future we plan to add more features to this system while improving the performance and stability of it.
+
+Possible improvements include the following aspects:
+
+- Feature filtering: One of the reasons we are hindered from making any progress in audio emotion recognition field is that the feature space of emotion is always hard to determine. Even humans cannot always tell the emotion of the songs accurately. Raw data preprocessing plays an important role in identifying this pattern. Feature filtering is a common method we adopt to dilate features while weakening noise (irrelevant stuffs), typically applied to image processing field. Same idea also fit in our specific case.
+
+- Smart dataset generation: The focus of this topic is not the automatic dataset generation logic. We emphasize instead on the "smart" cropping of the input audio files. Aa is often the case, the input audio file usually contains music with multiple paragraphs, and different paragraphs usually follow different patterns. As am example, we will commonly go through _intro, verse, choru_ paragraphs when we are listening to a song, and we are accustomed to treat _choru_ as the most expressive part. Then our tasks become to be: extract the _choru_ paragraph from the music, though exceptions do exist.
+
+- Dynamic network construction: As we have mentioned above, the complexity of input data and users' requirements determine how complex the learning model is. We should enable our system to automatically or manually adjust to its traning dataset so as to reduce learning cost.
+
+- Interface refining: Most of the interfaces defined in this report is only for previewing. In the future release we will work hard on these interfaces so that they are easy to interact with.
+
+Future releases preview:
+
+> Release v0.2
+
+- Implementation of interface `cvtRawToSpec()`
+- Performance improvement
+- Bug shooting
+
+> Release v0.3
+
+- New features: Music paragraphs auto cropping
+- Performance improvement
+- Bug shooting
 
 ## Prospects
 Although our current release of AEIS has achieved great success in identifying pure music emotion. Business standard requires our work to be applied to a wide range of daily scenarios. We roughly classify the possible applications of our system into the following three categories:
