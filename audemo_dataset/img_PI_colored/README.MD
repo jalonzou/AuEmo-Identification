@@ -7,5 +7,14 @@ The raw audio data is preprocessed and converted into standardization mel-spectr
 
 Intuitively we expect each style shares some degrees of common patterns in pace and frequency space. These patterns are usually hard for our eyes to indentify given a raw mel-spectrogram image but can be easily discerned by our ears. However our learning module should be capable of handling this level of tasks given that the network structure is a perfect mix of convolutional layers (simulating human eyes) and recursive layers (simulating human cochlea).
 
-Here we present an example of this dataset for your quick view:
-![spectrogram of angry emotion](angry/angry_008.jpg)
+Here we present some examples of this dataset for your quick view:
+### Angry
+![spectrogram of angry emotion](angry/angry_000.jpg)
+### Happy
+![spectrogram of happy emotion](happy/happy_010.jpg)
+### Peaceful
+![spectrogram of peaceful emotion](peaceful/peaceful_011.jpg)
+### Sad
+![spectrogram of sad emotion](sad/sad_009.jpg)
+### Horror
+![spectrogram of horror emotion](horror/horror_001.jpg)
