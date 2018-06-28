@@ -88,30 +88,11 @@ At the end we specify a softmax layers for multi-class classification. The numbe
 In order to validate the performance of our dataset and facilitate users' learning process. We introduce here two datasets which is feasible for testing our system. The first dataset contains pure piano solos, classified into 5 classes. And the second one is a dataset of songs divided into 4 different styles.
 
 ### Piano Emotion Dataset
-This dataset is totaly collected and handmade by our team. It includes piano solos of 5 distinct styles: 
-
-`angry`, `happy`, `horror`, `peaceful`, `sad`
-
-The raw audio data is preprocessed and converted into standardization mel-spectrograms using the interface we provided in this system.
-
-Intuitively we expect each style shares some degrees of common patterns in pace and frequency space. These patterns are usually hard for our eyes to indentify given a raw mel-spectrogram image but can be easily discerned by our ears. However our learning module should be capable of handling this level of tasks given that the network structure is a perfect mix of convolutional layers (simulating human eyes) and recursive layers (simulating human cochlea).
-
-Here we present an example of this dataset for your quick view:
-"Examlple pic"
+This dataset is totaly collected and handmade by our team. For more information see: [Piano Emotion Dataset](audemo_dataset/img_PI_colored/)
 
 ### Songs Emotion Dataset
 
-Another dataset we adopted for testing is a dataset of songs, you can download it from: [Songs Emotion Dataset](https://code.soundsoftware.ac.uk/projects/emotion-recognition/repository/show/4.%20dataset%20(audio))
-
-It includes songs of 4 different styles: 
-
-`angry`, `happy`, `relax`, `sad`
-
-Reasonably this dataset incurs a more challenging task to the training module comparing with the "Piano Emotion Dataset", as human voice is incorporated now and more undetermined factors should be taken into account.
-
-One solution to this challenging case suggests us to place more effort on the data preprocessing stage. By seperating foreground human voice from backgroud music, we can consequently apply different information extraction strategy on the raw audio data. This incurs considerable amount of noise to the raw audio data and extra effort should be devoted to relevant aspects. 
-
-Apart from denosing tasks we need to perform. Plenty of tricks should be played as we wish to crest the peak of accuracy in songs emotion recognition. These tricks, however, is rather complicated to elaborate in several words. We will go further into details in the subsequent sections.
+Another dataset we adopted for testing is a dataset of songs. For more informaion of this dataset see: [Songs Emotion Dataset](audemo_dataset/img_HV/)
 
 
 ## Improvement && Future Release

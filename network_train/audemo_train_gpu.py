@@ -5,7 +5,6 @@ from tensorflow.python.platform import gfile
 import time
 import os.path
 from datetime import datetime
-from six.moves import xrange
 
 import audemo
 
@@ -17,7 +16,7 @@ tf.app.flags.DEFINE_string('train_dir', 'audemo_train',
 tf.app.flags.DEFINE_string('log_dir', 'audemo_log',
                            'Directory where to write event logs and checkpoint')
 
-tf.app.flags.DEFINE_integer('max_steps', 1000,
+tf.app.flags.DEFINE_integer('max_steps', 300,
                             'Number of batches to run.')
 
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
@@ -28,38 +27,26 @@ tf.app.flags.DEFINE_integer('log_frequency', 10,
 
 NUM_EPOCHS = 1000
 
-# def fill_feed_dict(drop_out, rate):
-#     feed_dict = {
-#         drop_out: rate
-#     }
-#     return feed_dict
-
-
-def fill_feed_dict(image_p1, label_p2):
-    images = np.ones((FLAGS.batch_size, audemo.IMAGE_HEIGHT, audemo.IMAGE_WIDTH, 3))
-    labels = np.ones((FLAGS.batch_size))
+def fill_feed_dict(drop_out, rate):
     feed_dict = {
-        image_p1: images,
-        label_p2: labels
+        drop_out: rate
     }
     return feed_dict
 
 
 def run_train():
     with tf.Graph().as_default():
-        # global_step = tf.train.get_or_create_global_step()
-        global_step = tf.Variable(0, trainable=False)
+        global_step = tf.train.get_or_create_global_step()
+
         # Get images and labels from dataset.
         # Force input pipeline to CPU:0 to avoid operations sometimes ending up on
         # GPU and resulting in a slow down.
-        image_p = tf.placeholder(tf.float32, [FLAGS.batch_size, audemo.IMAGE_HEIGHT, audemo.IMAGE_WIDTH, 3])
-        label_p = tf.placeholder(tf.int32, [FLAGS.batch_size])
+        with tf.device('/cpu:0'):
+            images, labels = audemo.distorted_input(num_epochs=NUM_EPOCHS)
+            keep_prob = tf.placeholder(tf.float32)
 
-        # images, labels = audemo.distorted_input(num_epochs=NUM_EPOCHS)
-        keep_prob = tf.placeholder(tf.float32)
-
-        logits = audemo.inference(image_p)
-        total_loss = audemo.loss(logits, label_p)
+        logits = audemo.inference(images, keep_prob)
+        total_loss = audemo.loss(logits, labels)
         train_op = audemo.train(total_loss, global_step)
 
         saver = tf.train.Saver(tf.global_variables())
@@ -70,14 +57,13 @@ def run_train():
 
         with tf.Session(config=tf.ConfigProto(log_device_placement=FLAGS.log_device_placement)) as sess:
             sess.run(init)
+
             summary_writer = tf.summary.FileWriter(FLAGS.log_dir, graph=sess.graph)
 
             # Set keeping rate for dropout
-            # feed_dict = fill_feed_dict(keep_prob, 0.7)
+            feed_dict = fill_feed_dict(keep_prob, 0.7)
 
             for step in xrange(FLAGS.max_steps):
-                feed_dict = fill_feed_dict(image_p, label_p)
-
                 start_time = time.time()
                 _, loss_value = sess.run([train_op, total_loss], feed_dict=feed_dict)
                 duration = time.time() - start_time

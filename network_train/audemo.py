@@ -19,6 +19,7 @@ INITIAL_LEARNING_RATE = 0.1
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = audemo_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = audemo_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
+# Define RNN properties
 RNN_LAYERS = 2
 RNN_HIDDEN_SIZE = 6
 RNN_REDUCED_SIZE = 288
@@ -29,7 +30,7 @@ IMAGE_WIDTH = audemo_input.IMAGE_WIDTH
 
 TOWER_NAME = 'tower'
 
-
+# Get the input from the training dataset
 def train_input(num_epochs, is_augment=True):
     images, labels =  audemo_input.inputs(is_train=True, 
       batch_size=FLAGS.batch_size, 
@@ -38,6 +39,7 @@ def train_input(num_epochs, is_augment=True):
     return images, labels
 
 
+# Get the input from the testing dataset
 def eval_input(num_epochs):
     images, labels =  audemo_input.inputs(is_train=False, 
       batch_size=FLAGS.batch_size, 
@@ -45,12 +47,15 @@ def eval_input(num_epochs):
       is_augment=False)
     return images, labels
 
+
+# Do summary for each layer
 def _activation_summary(x):
     tensor_name = re.sub('%s_[0-9]*/' % TOWER_NAME, '', x.op.name)
     tf.summary.histogram(tensor_name + '/activations', x)
     tf.summary.scalar(tensor_name + '/sparsity', tf.nn.zero_fraction(x))
 
 
+# Create a variable, force the location of it on CPU
 def _variable_on_cpu(name, shape, initializer):
     with tf.device('/cpu:0'):
         dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
@@ -58,6 +63,7 @@ def _variable_on_cpu(name, shape, initializer):
     return var
 
 
+# Create variables with weight decay to control overfitting
 def _variable_with_weight_decay(name, shape, stddev, wd):
     dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
     var = _variable_on_cpu(name,
@@ -70,7 +76,9 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
     return var
 
 
+# Define the network structure
 def inference(inputs, keep_prob):
+    # 1st convolutional layer
     with tf.variable_scope('conv1') as scope:
         kernel = _variable_with_weight_decay('weights',
                                              shape=[7, 7, audemo_input.IMAGE_DEPTH, 16],
@@ -82,13 +90,16 @@ def inference(inputs, keep_prob):
         conv1 = tf.nn.relu(pre_activation, name=scope.name)
         _activation_summary(conv1)
 
+    # Mal pooling layer
     pool1 = tf.nn.max_pool(conv1,
                            ksize=[1, 3, 3, 1],
                            strides=[1, 2, 2, 1],
                            padding='SAME',
                            name='pool1')
+    # Weight normalization
     norm1 = tf.nn.lrn(pool1, depth_radius=4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm1')
 
+    # 2nd convolutional layer
     with tf.variable_scope('conv2') as scope:
         kernel = _variable_with_weight_decay('weights',
                                              shape=[5, 5, 16, 32],
@@ -107,6 +118,7 @@ def inference(inputs, keep_prob):
                            padding='SAME',
                            name='pool2')
 
+    # 3rd convolutional layer
     with tf.variable_scope('conv3') as scope:
         kernel = _variable_with_weight_decay('weights',
                                              shape=[3, 3, 32, 32],
@@ -125,6 +137,7 @@ def inference(inputs, keep_prob):
                            name='pool3')
     norm3 = tf.nn.lrn(pool3, depth_radius=4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm3')
 
+    # 4th convolutional layer
     with tf.variable_scope('conv4') as scope:
         kernel = _variable_with_weight_decay('weights',
                                              shape=[3, 3, 32, 32],
@@ -142,22 +155,23 @@ def inference(inputs, keep_prob):
                            padding='SAME',
                            name='pool4')
 
-    # return tf.shape(pool4)
-
 
     pool4 = tf.reshape(pool4, [-1, RNN_REDUCED_SIZE, 32])
+
+    # Reshape the output of last pooling layer to feed into RNN
     pool4_concat = [pool4]
     pool4_concat = tf.concat(pool4_concat, 2)
+    # Flatten the 2D feature maps to 1D vectors
     inputs4 = [tf.squeeze(input_, [1]) for input_ in tf.split(pool4_concat, num_or_size_splits=RNN_REDUCED_SIZE, axis=1)]
 
-
+    # First RNN layer
     with tf.variable_scope('rnn5') as scope:
         cell = tf.contrib.rnn.GRUCell(128)
         init_state_cell = cell.zero_state(FLAGS.batch_size, tf.float32)
         output, final_state = tf.nn.static_rnn(
             cell, inputs4, initial_state=init_state_cell)
 
-
+    # Full connection layer
     with tf.variable_scope('flc6') as scope:
         reshape = tf.reshape(final_state, [FLAGS.batch_size, -1])
         dim = reshape.get_shape()[1].value
@@ -172,30 +186,35 @@ def inference(inputs, keep_prob):
         flc6 = tf.nn.relu(tf.matmul(reshape, weights) + biases, name=scope.name)
         _activation_summary(flc6)
 
+    # Softmax layer
     with tf.variable_scope('softmax_linear') as scope:
         weights = _variable_with_weight_decay('weights',
                                               [176, NUM_CLASSES],
                                               stddev=1 / 176.0, wd=None)
         biases = _variable_on_cpu('biases', [NUM_CLASSES],
                                   tf.constant_initializer(0.0))
+        # Calculation of the logits
         softmax_linear = tf.add(tf.matmul(flc6, weights), biases, name=scope.name)
         _activation_summary(softmax_linear)
-
+        
     return softmax_linear
 
 
 def loss(logits, labels):
+    # Convert labels to one-hot vector and calculate the loss (cross entropy)
     labels = tf.cast(labels, tf.int64)
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
         labels=labels,
         logits=logits,
         name='cross_entropy_per_example')
+    # Calculate the mean of the loss vectors on different dataset
     cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy')
     tf.add_to_collection('losses', cross_entropy_mean)
 
     return tf.add_n(tf.get_collection('losses'), name='total_loss')
 
 
+# Do summaries for losses
 def _add_loss_summaries(total_loss):
     loss_averages_calculator = tf.train.ExponentialMovingAverage(0.9, name='avg')
     loss_group = tf.get_collection('losses')
@@ -208,10 +227,13 @@ def _add_loss_summaries(total_loss):
     return loss_averages_op
 
 
+# Define the training process
 def train(total_loss, global_step):
+    # Optimizer with step decay every certain number of epoches
     num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / FLAGS.batch_size
     decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
 
+    # Define the type of optimizer
     lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
                                     global_step,
                                     decay_steps,
@@ -221,12 +243,15 @@ def train(total_loss, global_step):
 
     loss_averages_op = _add_loss_summaries(total_loss)
 
+    # Compute the gradients for all trainable parameters
     with tf.control_dependencies([loss_averages_op]):
         optimizer = tf.train.AdagradOptimizer(lr)
         grads = optimizer.compute_gradients(total_loss)
 
+    # Apply the gradients to all variables
     apply_gradient_op = optimizer.apply_gradients(grads, global_step=global_step)
 
+    # Do summaries
     for var in tf.trainable_variables():
         tf.summary.histogram(var.op.name, var)
 
@@ -234,6 +259,7 @@ def train(total_loss, global_step):
         if grad is not None:
             tf.summary.histogram(var.op.name + '/gradients', grad)
 
+    # Calculate the moving average of the global parameters, which has more stable performance for testing
     variable_averages_calculator = tf.train.ExponentialMovingAverage(
         MOVING_AVERAGE_DECAY, global_step)
 
